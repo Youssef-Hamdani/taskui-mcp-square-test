@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>
+ body{font:14px system-ui;margin:0;padding:16px;color:var(--text,#202124)}
+ .square{width:180px;height:180px;border-radius:18px;background:#2563eb;color:white;display:flex;align-items:center;justify-content:center;text-align:center;font-size:23px;font-weight:700;box-shadow:0 5px 18px #2563eb35}
+ .nodes{display:flex;gap:8px;align-items:center;margin-top:16px;flex-wrap:wrap}
+ button{font:inherit;cursor:pointer;border:1px solid #94a3b8;border-radius:9px;background:white;padding:12px;color:#111827}
+ button[aria-pressed="true"]{background:#dbeafe;border-color:#2563eb}
+ .arrow{font-size:24px} small{display:block;margin-top:12px;color:#64748b}
+</style>
+<div class="square">I'm a plugin UI</div>
+<div class="nodes"><button id="a" aria-pressed="true">P006 · Diagnose rack</button><span class="arrow">→</span><button id="b" aria-pressed="false">P007 · Compare sources</button></div>
+<small id="selected">Selected: P006</small>
+<script>
+ const ids=['P006','P007'];
+ function select(id){for(const x of ids)document.getElementById(x==='P006'?'a':'b').setAttribute('aria-pressed',String(x===id));document.getElementById('selected').textContent='Selected: '+id;
+   // Portable MCP Apps channel: selection is available to the model on a subsequent turn.
+   if(window.parent!==window)window.parent.postMessage({jsonrpc:'2.0',method:'ui/update-model-context',params:{content:[{type:'text',text:'TaskUI selection changed to '+id}]}},'*');
+ }
+ document.getElementById('a').onclick=()=>select('P006');document.getElementById('b').onclick=()=>select('P007');
+</script>
+</html>
