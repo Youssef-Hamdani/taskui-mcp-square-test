@@ -35,6 +35,26 @@ function makeServer() {
     structuredContent: { pong: true },
     content: [{ type: 'text', text: JSON.stringify({ pong: true }) }],
   }));
+  server.registerTool('echo_form', {
+    title: 'Echo TaskUI form',
+    description: 'Accept a small TaskUI layout-preference form and echo the values back as JSON. Read-only experiment; nothing is stored.',
+    inputSchema: {
+      layout: z.enum(['compact', 'detailed']),
+      default_view: z.enum(['dependency_graph', 'milestone_roadmap', 'task_list']),
+      show_progress_bars: z.boolean(),
+      currency: z.enum(['CAD', 'USD', 'EUR']),
+    },
+    outputSchema: {
+      received: z.boolean(),
+      layout: z.string(),
+      default_view: z.string(),
+      show_progress_bars: z.boolean(),
+      currency: z.string(),
+    },
+  }, async ({ layout, default_view, show_progress_bars, currency }) => {
+    const payload = { received: true, layout, default_view, show_progress_bars, currency };
+    return { structuredContent: payload, content: [{ type: 'text', text: JSON.stringify(payload) }] };
+  });
   return server;
 }
 
