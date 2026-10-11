@@ -1,0 +1,40 @@
+{
+  "status": {
+    "Complete": {
+      "icon": "✓",
+      "tone": "success"
+    },
+    "In progress": {
+      "icon": "◷",
+      "tone": "warning"
+    },
+    "Blocked": {
+      "icon": "🔒",
+      "tone": "danger"
+    },
+    "Not started": {
+      "icon": "○",
+      "tone": "neutral"
+    },
+    "Superseded": {
+      "icon": "▤",
+      "tone": "muted"
+    }
+  },
+  "provenance": {
+    "AI": "✦ AI proposal",
+    "user": "User",
+    "hybrid": "Hybrid",
+    "imported": "Imported"
+  },
+  "changes": {
+    "added": "+ Added",
+    "edited": "✎ Edited",
+    "excluded": "− Excluded",
+    "unchanged": "Unchanged"
+  },
+  "validation": {
+    "icon": "!",
+    "tone": "danger"
+  }
+}

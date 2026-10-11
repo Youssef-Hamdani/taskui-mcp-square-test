@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
+import {Client} from '@modelcontextprotocol/sdk/client/index.js';import {InMemoryTransport} from '@modelcontextprotocol/sdk/inMemory.js';import {makeServer} from '../server.mjs';import {ProjectStore} from '../lib/store.mjs';import {createDraft,draftFrom} from '../lib/engine.mjs';
+async function session(store,scope={read:true,write:true}){const server=makeServer(scope,store),client=new Client({name:'connected-acceptance',version:'1'}),[a,b]=InMemoryTransport.createLinkedPair();await server.connect(a);await client.connect(b);return {client,close:async()=>{await client.close();await server.close();}};}
+test('connected MCP vertical slice commits, fresh client reloads, status change survives database reopen',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'taskui-connected-')),path=join(dir,'db.sqlite');let store=new ProjectStore(path),s=await session(store);
+ const invoke=async(name,args)=>{const r=await s.client.callTool({name,arguments:args});assert.equal(r.isError,undefined,JSON.stringify(r.content));return r.structuredContent;};
+ try{const config=await invoke('get_taskui_configuration',{});assert.equal(config.mode,'connected');
+ let draft=createDraft({name:'Synthetic connected acceptance',goal:'Test exact MCP save/read/update',tasks:[{title:'Do first'},{title:'Do second'}]});
+ const commit=async()=>{const review=await invoke('preview_project_changes',{draft,mode:'connected'});assert.equal(review.valid,true);const write=await invoke('commit_approved_changes',{draft,approval:{approval_id:crypto.randomUUID(),review_digest:review.review_digest,draft_revision:draft.draft_revision,explicit_approval:true}});assert.equal(write.verified,true);return write.saved;};
+ const created=await commit();assert.equal(created.project.revision,1);await s.close();store.close();store=new ProjectStore(path);s=await session(store);
+ const loaded=(await invoke('load_project',{project_id:created.project.project_id})).saved;draft=draftFrom(loaded);draft.tasks[0].status='Complete';draft.draft_revision++;await commit();await s.close();store.close();store=new ProjectStore(path);s=await session(store);
+ const fresh=(await invoke('load_project',{project_id:created.project.project_id})).saved;assert.equal(fresh.project.revision,2);assert.equal(fresh.tasks[0].status,'Complete');assert.equal(fresh.tasks[0].version,2);assert.equal((await invoke('list_projects',{})).projects.length,1);
+ await s.close();s=await session(store,{read:true,write:false});const unauthorized=await s.client.callTool({name:'commit_approved_changes',arguments:{draft,approval:{approval_id:'unauthorized',review_digest:'0'.repeat(64),draft_revision:2,explicit_approval:true}}});assert.equal(unauthorized.isError,true);assert.equal(JSON.parse(unauthorized.content[0].text).code,'UNAUTHORIZED');
+ }finally{await s.close();store.close();rmSync(dir,{recursive:true});}
+});

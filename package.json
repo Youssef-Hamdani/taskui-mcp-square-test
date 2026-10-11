@@ -1,17 +1,27 @@
 {
   "name": "taskui-mcp-square-test",
   "private": true,
-  "version": "0.2.0",
+  "version": "1.0.0",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
-    "build": "node --check server.mjs",
+    "build": "node build.mjs && node --check server.mjs",
     "start": "node server.mjs",
-    "start:stdio": "MCP_TRANSPORT=stdio node server.mjs"
+    "start:stdio": "MCP_TRANSPORT=stdio node server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "test:ui": "playwright test"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "express": "^4.21.2",
+    "jose": "^6.2.12",
     "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "esbuild": "^0.28.2",
+    "zod-to-json-schema": "^3.25.2"
   }
 }
