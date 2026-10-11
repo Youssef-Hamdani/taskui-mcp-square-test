@@ -11,6 +11,20 @@
 <div class="square">I'm a plugin UI</div>
 <div class="nodes"><button id="a" aria-pressed="true">P006 · Diagnose rack</button><span class="arrow">→</span><button id="b" aria-pressed="false">P007 · Compare sources</button></div>
 <small id="selected">Selected: P006</small>
+
+<section style="margin-top:20px;padding:14px;border:1px solid #cbd5e1;border-radius:12px">
+  <strong>Direct MCP form submission test</strong>
+  <p style="font-size:12px;color:#64748b">Submit directly from the plugin iframe without sending a chat message. Data is echoed, not saved.</p>
+  <label for="layout">Layout</label>
+  <select id="layout" style="margin:8px;padding:8px"><option value="compact">Compact</option><option value="detailed">Detailed</option></select>
+  <label for="view">View</label>
+  <select id="view" style="margin:8px;padding:8px"><option value="dependency_graph">Dependency graph</option><option value="milestone_roadmap">Milestones</option><option value="task_list">Task list</option></select>
+  <label style="display:block;margin:9px 0"><input id="bars" type="checkbox" checked> Progress bars</label>
+  <label for="currency">Currency</label>
+  <select id="currency" style="margin:8px;padding:8px"><option value="CAD">CAD</option><option value="USD">USD</option><option value="EUR">EUR</option></select>
+  <div><button id="submitForm" style="background:#2563eb;color:white">Send form directly to MCP</button></div>
+  <pre id="formResult" aria-live="polite" style="white-space:pre-wrap;font-size:12px;background:#f1f5f9;color:#111827;padding:10px;border-radius:8px;margin-top:8px">Waiting for submission.</pre>
+</section>
 <script>
  const ids=['P006','P007'];
  function select(id){for(const x of ids)document.getElementById(x==='P006'?'a':'b').setAttribute('aria-pressed',String(x===id));document.getElementById('selected').textContent='Selected: '+id;
@@ -18,5 +32,42 @@
    if(window.parent!==window)window.parent.postMessage({jsonrpc:'2.0',method:'ui/update-model-context',params:{content:[{type:'text',text:'TaskUI selection changed to '+id}]}},'*');
  }
  document.getElementById('a').onclick=()=>select('P006');document.getElementById('b').onclick=()=>select('P007');
+
+ const pendingCalls=new Map();
+ let callSequence=1;
+ window.addEventListener('message',event=>{
+   if(event.source!==window.parent)return;
+   const message=event.data;
+   if(!message||message.jsonrpc!=='2.0'||message.id===undefined)return;
+   const pending=pendingCalls.get(message.id);
+   if(!pending)return;
+   pendingCalls.delete(message.id);
+   if(message.error)pending.reject(message.error);
+   else pending.resolve(message.result);
+ });
+ function callMcpTool(name,args){
+   if(window.openai?.callTool)return window.openai.callTool(name,args);
+   const id='form-test-'+callSequence++;
+   const promise=new Promise((resolve,reject)=>pendingCalls.set(id,{resolve,reject}));
+   window.parent.postMessage({jsonrpc:'2.0',id,method:'tools/call',params:{name,arguments:args}},'*');
+   return promise;
+ }
+ document.getElementById('submitForm').onclick=async()=>{
+   const btn=document.getElementById('submitForm');
+   const out=document.getElementById('formResult');
+   const payload={
+     layout:document.getElementById('layout').value,
+     default_view:document.getElementById('view').value,
+     show_progress_bars:document.getElementById('bars').checked,
+     currency:document.getElementById('currency').value
+   };
+   btn.disabled=true;out.textContent='Calling echo_form via MCP...';
+   try{
+     const result=await callMcpTool('echo_form',payload);
+     const value=result?.structuredContent??result;
+     out.textContent='MCP returned:\\n'+JSON.stringify(value,null,2);
+   }catch(err){out.textContent='MCP call failed: '+(err?.message||JSON.stringify(err));}
+   finally{btn.disabled=false;}
+ };
 </script>
 </html>
