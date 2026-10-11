@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "draft_id": "draft_b77b65a1-9799-486f-8d7e-c54d10e0ee82",
+  "draft_revision": 1,
+  "expected_revision": 0,
+  "project": {
+    "project_id": "project_6835d30f-014c-4a5e-b025-65123f6ccd3a",
+    "name": "Synthetic Chrysler diagnosis",
+    "goal": "Demonstrate conditional planning only; not real repair status.",
+    "context": "All tasks and diagnostic results below are synthetic acceptance fixtures.",
+    "target_date": null,
+    "framework": "dependencies",
+    "instructions": "",
+    "revision": 0
+  },
+  "tasks": [
+    {
+      "notes": "",
+      "status": "Complete",
+      "estimated_minutes": null,
+      "due_date": null,
+      "depends_on": [],
+      "provenance": "user",
+      "version": 1,
+      "applicability": "applicable",
+      "archived": false,
+      "condition": null,
+      "task_id": "diagnose-rack",
+      "title": "Diagnose steering rack",
+      "project_id": "project_6835d30f-014c-4a5e-b025-65123f6ccd3a"
+    },
+    {
+      "notes": "",
+      "status": "Not started",
+      "estimated_minutes": null,
+      "due_date": null,
+      "depends_on": [
+        "diagnose-rack"
+      ],
+      "provenance": "user",
+      "version": 1,
+      "applicability": "not_applicable",
+      "archived": false,
+      "condition": {
+        "diagnostic_task_id": "diagnose-rack",
+        "outcome": "not_required"
+      },
+      "task_id": "replace-rack",
+      "title": "Replace rack only if failure confirmed",
+      "project_id": "project_6835d30f-014c-4a5e-b025-65123f6ccd3a"
+    },
+    {
+      "notes": "",
+      "status": "Not started",
+      "estimated_minutes": null,
+      "due_date": null,
+      "depends_on": [],
+      "provenance": "AI",
+      "version": 1,
+      "applicability": "applicable",
+      "archived": false,
+      "condition": null,
+      "task_id": "inspect-tyres",
+      "title": "Inspect tyres",
+      "project_id": "project_6835d30f-014c-4a5e-b025-65123f6ccd3a"
+    },
+    {
+      "notes": "",
+      "status": "Not started",
+      "estimated_minutes": null,
+      "due_date": null,
+      "depends_on": [],
+      "provenance": "AI",
+      "version": 1,
+      "applicability": "applicable",
+      "archived": false,
+      "condition": null,
+      "task_id": "inspect-brakes",
+      "title": "Inspect brakes",
+      "project_id": "project_6835d30f-014c-4a5e-b025-65123f6ccd3a"
+    }
+  ],
+  "exclusions": [],
+  "splits": [],
+  "split_requests": [],
+  "instruction_scope": "this_submission",
+  "additional_instructions": ""
+}
