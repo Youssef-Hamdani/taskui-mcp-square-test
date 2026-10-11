@@ -26,6 +26,15 @@ function makeServer() {
     structuredContent: { title: "I'm a plugin UI", selectedTaskId: 'P006' },
     content: [{ type: 'text', text: 'TaskUI square UI: choose P006 or P007. No project data read or written.' }],
   }));
+  server.registerTool('ping', {
+    title: 'Ping TaskUI',
+    description: 'Return a minimal JSON pong response for connection testing. No inputs, reads, or writes.',
+    inputSchema: {},
+    outputSchema: { pong: z.boolean() },
+  }, async () => ({
+    structuredContent: { pong: true },
+    content: [{ type: 'text', text: JSON.stringify({ pong: true }) }],
+  }));
   return server;
 }
 
