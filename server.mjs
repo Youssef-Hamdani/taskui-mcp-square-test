@@ -5,11 +5,11 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 
-const RESOURCE_URI = 'ui://taskui-square/v1.html';
+const RESOURCE_URI = 'ui://taskui-square/v2.html';
 const html = readFileSync(new URL('./widget.html', import.meta.url), 'utf8');
 
 function makeServer() {
-  const server = new McpServer({ name: 'taskui-square-test', version: '0.2.0' });
+  const server = new McpServer({ name: 'taskui-square-test', version: '0.3.0' });
   server.registerResource('taskui-square', RESOURCE_URI, {}, async () => ({
     contents: [{ uri: RESOURCE_URI, mimeType: 'text/html;profile=mcp-app', text: html,
       _meta: { ui: { prefersBorder: true } } }],
