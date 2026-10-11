@@ -42,6 +42,7 @@
     const id = newId("project");
     return {
       schema_version: 1,
+      creation_mode: "hybrid",
       draft_id: newId("draft"),
       draft_revision: 1,
       expected_revision: 0,
@@ -194,16 +195,16 @@
     return next;
   }
   function draftFrom(saved) {
-    return { schema_version: 1, draft_id: newId("draft"), draft_revision: 1, expected_revision: saved.project.revision, project: clone(saved.project), tasks: clone(saved.tasks), exclusions: [], splits: [], split_requests: [], instruction_scope: "this_submission", additional_instructions: "" };
+    return { schema_version: 1, creation_mode: "hybrid", draft_id: newId("draft"), draft_revision: 1, expected_revision: saved.project.revision, project: clone(saved.project), tasks: clone(saved.tasks), exclusions: [], splits: [], split_requests: [], instruction_scope: "this_submission", additional_instructions: "" };
   }
   function reduceEditor(state2, action) {
-    if (action.type === "reset") return { ...state2, draft: clone(state2.original), undo: [...state2.undo, clone(state2.draft)], review: null };
+    if (action.type === "reset") return { ...state2, draft: clone(state2.original), mode: state2.original.creation_mode ?? "hybrid", undo: [...state2.undo, clone(state2.draft)], review: null };
     if (action.type === "undo") {
       if (!state2.undo.length) return state2;
-      return { ...state2, draft: state2.undo.at(-1), undo: state2.undo.slice(0, -1), review: null };
+      return { ...state2, draft: state2.undo.at(-1), mode: state2.undo.at(-1).creation_mode ?? "hybrid", undo: state2.undo.slice(0, -1), review: null };
     }
     if (action.type === "select") return { ...state2, selected: action.id };
-    if (action.type === "mode") return { ...state2, mode: action.mode };
+    if (action.type === "mode") return { ...state2, mode: action.mode, draft: { ...state2.draft, creation_mode: action.mode, draft_revision: state2.draft.draft_revision + 1 }, review: null };
     const next = clone(state2.draft);
     if (action.type === "task") Object.assign(next.tasks.find((t) => t.task_id === action.id), action.patch);
     if (action.type === "project") Object.assign(next.project, action.patch);
@@ -241,7 +242,7 @@
   function install(draft, source = null, connected = false) {
     if (!draft?.project || !Array.isArray(draft.tasks) || !Array.isArray(draft.exclusions) || !Array.isArray(draft.splits) || draft.tasks.length > 500) throw Error("Invalid complete draft");
     validate(draft, source);
-    state = { draft: clone(draft), original: clone(draft), source: clone(source), undo: [], selected: draft.tasks[0]?.task_id ?? null, mode: "hybrid", review: null, connected };
+    state = { draft: clone(draft), original: clone(draft), source: clone(source), undo: [], selected: draft.tasks[0]?.task_id ?? null, mode: draft.creation_mode ?? "hybrid", review: null, connected };
     generation++;
     render();
   }

@@ -119,7 +119,7 @@ if (process.env.MCP_TRANSPORT === 'stdio') {
       res.on('close', () => { transport.close().catch(() => {}); server.close().catch(() => {}); });
       await transport.handleRequest(req, res, req.body);
     } catch (error) {
-      console.error('MCP request failed:', error);
+      console.error('MCP request failed:', error?.code??'TRANSPORT_ERROR');
       if (!res.headersSent) res.status(500).json({ error: 'MCP request failed' });
     }
   });

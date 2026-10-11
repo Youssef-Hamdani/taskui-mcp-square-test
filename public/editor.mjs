@@ -12,7 +12,7 @@ function install(draft,source=null,connected=false){
   // Imported data is local untrusted input; backend remains authoritative.
   if(!draft?.project||!Array.isArray(draft.tasks)||!Array.isArray(draft.exclusions)||!Array.isArray(draft.splits)||draft.tasks.length>500)throw Error('Invalid complete draft');
   validate(draft,source);
-  state={draft:clone(draft),original:clone(draft),source:clone(source),undo:[],selected:draft.tasks[0]?.task_id??null,mode:'hybrid',review:null,connected};generation++;render();
+  state={draft:clone(draft),original:clone(draft),source:clone(source),undo:[],selected:draft.tasks[0]?.task_id??null,mode:draft.creation_mode??'hybrid',review:null,connected};generation++;render();
 }
 function field(parent,label,value,onChange,kind='text',options=null){
   const wrap=el('div');wrap.append(el('label',label));
